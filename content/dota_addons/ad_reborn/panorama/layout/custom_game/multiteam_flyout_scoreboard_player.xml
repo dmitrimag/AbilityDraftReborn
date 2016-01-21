@@ -1,0 +1,11 @@
+<root>
+    <styles>
+		<include src="file://{resources}/styles/custom_game/shared_scoreboard_styles.css" />
+        <include src="file://{resources}/styles/custom_game/multiteam_flyout_scoreboard_adcm.css" />
+    </styles>
+	<Panel class="PlayerRow">
+		<Panel id="PlayerRowContainer" />
+	</Panel>
+</root>
+
+

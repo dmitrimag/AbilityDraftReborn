@@ -1,0 +1,13 @@
+<root>
+    <styles>
+    	<include src="file://{resources}/styles/custom_game/util.css" />
+        <include src="file://{resources}/styles/custom_game/hero_selection_cm_selection_player.css" />
+    </styles>
+
+    <Panel class="player">
+    	<DOTAHeroImage id="Image" class="hBlock" heroname="" />
+    	<Panel id="PlayerGap"  class="hBlock" />
+    	<Label id="PlayerName" text="" />
+    	<Label id="CaptainMark" class="hidden" text="C" />
+    </Panel>
+</root>

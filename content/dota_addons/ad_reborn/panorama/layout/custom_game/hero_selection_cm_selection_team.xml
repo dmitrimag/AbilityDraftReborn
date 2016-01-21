@@ -1,0 +1,51 @@
+<root>
+
+    <styles>
+        <include src="file://{resources}/styles/custom_game/util.css" />
+        <include src="file://{resources}/styles/custom_game/hero_selection.css" />
+        <include src="file://{resources}/styles/custom_game/hero_selection_cm_selection_team.css" />
+    </styles>
+
+    <Panel class="cmSelectionTeam vBlock cmParentCell">
+
+    	<Panel class="bTeamName hBlock">
+    		<!-- <Panel id="TeamLogo" /> -->
+    		<Label id="TeamName" text="InLOSTweTRUST" />
+    	</Panel>
+
+    	<Label id="State" class="hBlock" text="" />
+
+        <Panel id="Time" class="hBlock">
+        	<Panel class="bTime">
+        		<Label class="timeTitle" text="Time" />
+            	<Label id="MainTimer" text="30" />
+        	</Panel>
+            <Panel class="bTime">
+	            <Label class="timeTitle" text="Reserve Time" />
+	            <Label id="ReserveTimer" text="110" />
+            </Panel>
+        </Panel>
+
+        <Panel id="Heroes" class="hBlock">
+            <Panel class="bHeroes">
+                <Label class="heroesTitle hBlock" text="Bans" />
+                <Panel id="Bans" class="hBlock" />
+            </Panel>
+            <Panel class="bHeroes">
+                <Label class="heroesTitle hBlock" text="Picks" />
+                <Panel id="Picks" class="hBlock" />
+            </Panel>
+	    </Panel>
+
+	    <Panel id="bButton" class="invisible">
+          	<DOTAHeroImage id="CurrentHero" heroname="" />
+          	<Button id="Button">
+            	<Label id="ButtonLabel" text="Pick Hero" />
+          	</Button>
+	    </Panel>
+
+        <Panel id="Players" class="hBlock" />
+
+    </Panel>
+
+</root>

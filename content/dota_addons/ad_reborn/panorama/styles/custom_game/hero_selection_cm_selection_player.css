@@ -1,0 +1,32 @@
+.player {
+    margin: 20px 1px;
+    width: 20%;
+    height: width-percentage(78.75%);
+    overflow: clip;
+}
+.player DOTAHeroImage {
+/*    vertical-align: top;
+    horizontal-align: center;*/
+    height: width-percentage(56.25%);
+}
+#PlayerGap {
+/*    vertical-align: top;
+    horizontal-align: center;*/
+    height: width-percentage(56.25%);
+    background-color: #000;
+}
+#PlayerName {
+    vertical-align: bottom;
+    horizontal-align: center;
+    padding: 2px 0;
+    height: 14px;
+    font-size: 12;
+    color: #cccccc;
+    text-overflow: clip;
+}
+#CaptainMark {
+    padding: 5px;
+    font-size: 12;
+    font-weight: bold;
+    color: #ff666680;
+}

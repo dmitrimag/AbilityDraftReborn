@@ -1,0 +1,71 @@
+<root>
+
+    <styles>
+        <include src="file://{resources}/styles/custom_game/util.css" />
+        <include src="file://{resources}/styles/custom_game/hero_selection.css" />
+    </styles>
+
+    <scripts>
+        <include src="file://{resources}/scripts/custom_game/util.js" />
+        <include src="file://{resources}/scripts/custom_game/hero_selection.js" />
+    </scripts>
+
+    <Panel class="mainBlock">
+
+        <Panel id="adWrapper" class="wrapper">
+
+            <Panel class="mainTitle hBlock">
+                <Label text="Ability Draft Reborn" />
+            </Panel>
+
+            <Panel class="adTimeline">
+                <Panel class="adTimelineTimeBlock">
+                    <Label class="adTimelineTimeTitle" text="Next round in:" />
+                    <Panel class="adTimelineTimeClock">
+                        <Label id="adTime" class="adTimelineTimeText" text="30" />
+                    </Panel>
+                </Panel>
+                <Panel class="adTimelineQueue">
+                    <Label class="adTimelineQueueText" text="Currently drafting:" />
+                    <Panel class="adTimelineQueueCurrentBg vBlock" />
+                    <Panel id="adTimelineQueueHeroes" class="adTimelineQueueHeroes" />
+                </Panel>
+            </Panel>
+
+            <Panel id="adTable" class="hBlock" />
+
+        </Panel>
+
+        <Panel id="cmWrapper" class="wrapper">
+
+            <Panel class="mainTitle hBlock">
+                <Label id="cmWrapperText" text="Ability Draft Reborn" />
+            </Panel>
+
+            <Panel id="cmHeroes" class="vBlock cmParentCell">
+                <Panel id="cmHeroesTable" />
+                <Panel id="cmHeroesCover" class="hBlock vBlock isCover"></Panel>
+            </Panel>
+
+            <Panel id="cmSelection" class="vBlock">
+
+                <Panel id="cmSelectionTable" class="vBlock hBlock hidden" />
+
+                <Panel id="bCaptain" class="vBlock hBlock">
+                    <Label id="CaptainText" class="hidden" text="Waiting for other team..." />
+                    <Button id="CaptainButton" onactivate="JustDoIt()">
+                        <Label text="Become Captain" />
+                    </Button>
+                </Panel>
+
+            </Panel>
+
+        </Panel>
+
+        <Image id="cmInitializeCover" src="file://{images}/custom_game/splash.jpg" scaling="stretch-to-fit-preserve-aspect"/>
+        <!-- <Panel id="cmInitializeCover" class="hBlock">
+            <Label text="Initialize ADCM" />
+        </Panel> -->
+
+    </Panel>
+</root>

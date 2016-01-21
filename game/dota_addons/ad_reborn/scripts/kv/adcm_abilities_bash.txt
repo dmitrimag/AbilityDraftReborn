@@ -1,0 +1,7 @@
+"adcmAbilitiesBash"
+{
+    "1"     "faceless_void_time_lock"
+    "2"     "slardar_bash"
+    "3"     "spirit_breaker_greater_bash"
+    "4"     "troll_warlord_berserkers_rage"
+}

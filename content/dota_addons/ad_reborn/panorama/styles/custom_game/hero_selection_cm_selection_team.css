@@ -1,0 +1,152 @@
+.cmSelectionTeam {
+    flow-children: down;
+    max-width: 430px;
+    width: 50%;
+    margin-left: 40px;
+}
+.AspectRatio4x3 .cmSelectionTeam,
+.AspectRatio5x4 .cmSelectionTeam {
+    margin-left: 0px;
+}
+
+/*------------------------------*/
+
+.bTeamName {
+    flow-children: right-wrap;
+}
+#TeamName {
+    horizontal-align: center;
+    padding: 30px 0;
+    font-size: 18;
+    color: #ccc;
+    /*text-transform: uppercase;*/
+}
+
+/*------------------------------*/
+
+#State {
+    text-align: center;
+    padding-bottom: 30px;
+    font-size: 30;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+/*------------------------------*/
+
+#Time {
+    flow-children: right;
+    padding-bottom: 30px;
+}
+.bTime {
+    flow-children: down;
+    width: 50%;
+}
+.timeTitle {
+    horizontal-align: center;
+    margin-bottom: 5px;
+    font-size: 14;
+    color: #999;
+}
+#MainTimer,
+#ReserveTimer {
+    horizontal-align: center;
+    font-size: 30;
+    color: #fff;
+}
+
+/*------------------------------*/
+
+#Heroes {
+    flow-children: right-wrap;
+    padding-bottom: 30px;
+}
+
+.bHeroes {
+    flow-children: down;
+    width: 49.5%;
+}
+
+.heroesTitle {
+    text-align: center;
+    font-size: 18;
+    color: #999;
+    /*text-transform: uppercase;*/
+}
+
+#Bans,
+#Picks {
+    flow-children: right-wrap;
+    /*margin: 0 22px;*/
+    max-width: 170px;
+    horizontal-align: center;
+}
+
+#Bans {
+    saturation: 0.25;
+    brightness: 0.25;
+}
+
+.cm_selection_hero {
+    width: 49.5%;
+}
+
+/*------------------------------*/
+
+#bButton {
+    flow-children: right-wrap;
+    horizontal-align: center;
+    padding-bottom: 30px;
+}
+.AspectRatio4x3 #bButton,
+.AspectRatio5x4 #bButton {
+    flow-children: down;
+}
+
+#CurrentHero {
+    margin-right: 15px;
+    border: 1px solid #000;
+}
+.AspectRatio4x3 #CurrentHero,
+.AspectRatio5x4 #CurrentHero {
+    margin-right: 0px;
+    horizontal-align: center;
+}
+
+#Button {
+    flow-children: right-wrap;
+    vertical-align: center;
+    width: 208px;
+    height: 44px;
+    border: 1px solid #000;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from(#a50a04), to(#670303) );
+    box-shadow: inset #ffffff50 1px 1px 2px 2px;
+}
+.AspectRatio4x3 #Button,
+.AspectRatio5x4 #Button {
+    horizontal-align: center;
+}
+
+
+#Button:active {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from(#880303), to(#b80803) );
+}
+#ButtonLabel {
+    horizontal-align: center;
+    vertical-align: center;
+    font-size: 20;
+    color: #fff;
+    text-transform: uppercase;
+}
+#Button:active #ButtonLabel {
+    margin-top: 2px;
+}
+
+/*------------------------------*/
+
+#Players {
+    flow-children: right;
+    horizontal-align: center;
+    vertical-align: bottom;
+    max-width: 410px;
+}

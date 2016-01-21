@@ -1,0 +1,78 @@
+@define BACKGROUND_COLOR: #000000;
+@define BACKGROUND_COLOR_WHITE: #FFFFFF28;
+
+.FlyoutScoreboardRoot
+{
+    horizontal-align: left;
+    vertical-align: top;
+    margin-top: 50px;
+    flow-children: down;
+    padding: 10px;
+    
+    transform: translatex( -1200px );
+    transition-property: transform;
+    transition-duration: 0.05s;
+    transition-timing-function: linear;
+}
+
+.FlyoutScoreboardRoot.flyout_scoreboard_visible
+{
+    transform: translatey( 0px );
+}
+
+#TeamsContainer
+{
+    flow-children: down;
+    horizontal-align: center;
+    margin-top: 5px;
+}
+
+.FlyoutTeam
+{
+    margin-top: 63px;
+    margin-left: 555px;
+}
+
+.FlyoutTeam.no_players
+{
+    visibility: collapse;
+}
+
+.local_player_team.FlyoutTeam
+{
+    z-index: 99;
+}
+
+.FlyoutTeamData
+{
+    flow-children: right;
+}
+
+#PlayersContainer
+{
+    flow-children: down;
+}
+
+.local_player_team #PlayersContainer
+{
+    /*box-shadow: fill #ffffff40 -3px -3px 3px 6px;*/
+}
+
+
+.PlayerRow
+{
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+#PlayerRowContainer
+{
+    flow-children: right;
+    height: 40px;
+}
+
+.ability
+{
+    width: 45px;
+    height: 40px;
+}

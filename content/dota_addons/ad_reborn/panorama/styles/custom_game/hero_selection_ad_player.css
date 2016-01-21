@@ -1,0 +1,137 @@
+.PlayerPanel {
+    flow-children: right;
+    margin-bottom: 10px;
+    border-left: 5px solid #66ff66;
+    background-color: #1c1c1c;
+}
+
+.PlayerPanel.player_current {
+    animation-name: toLeft;
+    animation-delay: 0s;
+    animation-duration: 5s;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+}
+
+@keyframes 'toLeft'
+{
+    0% {
+        background-color: gradient( linear, 0% 0%, 200% 0%, from(#66ff6650), color-stop(0.5, #66ff6650), color-stop(0.51, #66ff6600), to(#66ff6600) );
+    }
+    100% {
+        background-color: gradient( linear, 0% 0%, 0% 0%, from(#66ff6650), color-stop(0.5, #66ff6650), color-stop(0.51, #66ff6600), to(#66ff6600) );
+    }
+
+}
+
+.player_local {
+    box-shadow: #66ff6650 -2px -2px 4px 4px;
+}
+
+/*------------------------------*/
+
+#bName {
+    vertical-align: center;
+    max-width: 150px;
+    width: 20.5%;
+    height: width-percentage(40%);
+    overflow: clip;
+}
+#PlayerName {
+    vertical-align: center;
+    horizontal-align: right;
+    font-size: 18;
+    color: #cccccc;
+}
+
+/*------------------------------*/
+
+#HeroImage {
+    vertical-align: center;
+    max-width: 80px;
+    width: 10.9%;
+    height: width-percentage(56.25%);
+    margin: 0px 5px;
+}
+
+/*------------------------------*/
+
+#bAbilities_New {
+    flow-children: right;
+    vertical-align: center;
+    max-width: 150px;
+    width: 20.5%;
+    margin-right: 20px;
+}
+#bAbilities_New DOTAAbilityImage {
+    max-width: 30px;
+    width: 20%;
+    height: width-percentage(100%);
+    margin-right: 5px;
+}
+
+/*------------------------------*/
+
+#bAbilities_Old {
+    flow-children: right;
+    vertical-align: center;
+    max-width: 325px;
+    width: 44.2%;
+}
+#bAbilities_Old RadioButton {
+    vertical-align: center;
+    max-width: 70px;
+    width: 21.5%;
+    height: width-percentage(100%);
+    margin: 5px;
+}
+#bAbilities_Old RadioButton.isUltimate {
+    width: 23%;
+    max-width: 75px;
+    height: width-percentage(100%);
+}
+#bAbilities_Old DOTAAbilityImage {
+    /*margin: 5px;*/
+    border: 3px solid #99999950;
+}
+#bAbilities_Old RadioButton.isUltimate DOTAAbilityImage {
+    box-shadow: #66ff6650 -2px -2px 4px 4px;
+}
+#bAbilities_Old RadioButton:disabled DOTAAbilityImage {
+    saturation: 0;
+}
+
+/*------------------------------*/
+
+.Dire .PlayerPanel {
+    border-left: 0;
+    border-right: 5px solid #ff6666;
+}
+
+.Dire .PlayerPanel.player_current {
+    animation-name: toRight;
+}
+
+@keyframes 'toRight'
+{
+    0% {
+        background-color: gradient( linear, 100% 0%, -100% 0%, from(#66ff6650), color-stop(0.5, #66ff6650), color-stop(0.51, #66ff6600), to(#66ff6600) );
+    }
+    100% {
+        background-color: gradient( linear, 100% 0%, 100% 0%, from(#66ff6650), color-stop(0.5, #66ff6650), color-stop(0.51, #66ff6600), to(#66ff6600) );
+    }
+}
+
+.Dire #PlayerName {
+    horizontal-align: left;
+}
+
+.Dire #bAbilities_New {
+    margin-right: 0;
+    margin-left: 20px;
+}
+
+.Dire #bAbilities_New DOTAAbilityImage {
+    margin-right: 0px;
+    margin-left: 5px;
+}

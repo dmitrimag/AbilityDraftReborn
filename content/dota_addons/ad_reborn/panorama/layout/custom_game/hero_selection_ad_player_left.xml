@@ -1,0 +1,21 @@
+<root>
+
+    <styles>
+        <include src="file://{resources}/styles/custom_game/hero_selection_ad_player.css" />
+    </styles>
+
+    <Panel class="PlayerPanel">
+
+        <Panel id="bName">
+            <Label id="PlayerName" text="" />
+        </Panel>
+
+        <DOTAHeroImage id="HeroImage" heroname="" />
+
+        <Panel id="bAbilities_New" />
+
+        <Panel id="bAbilities_Old" />
+
+    </Panel>
+
+</root>

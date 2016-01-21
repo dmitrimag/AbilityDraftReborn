@@ -1,0 +1,14 @@
+"AddonInfo"
+{
+	"TeamCount"		"2"
+	"maps"			"captains_mode all_pick"
+	"IsPlayable"	"1"
+	"all_pick"
+	{
+		"MaxPlayers"		"10"
+	}
+	"captains_mode"
+	{
+		"MaxPlayers"		"12"
+	}
+}
