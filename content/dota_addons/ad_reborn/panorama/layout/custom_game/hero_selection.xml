@@ -44,7 +44,7 @@
 
             <Panel id="cmHeroes" class="vBlock cmParentCell">
                 <Panel id="cmHeroesTable" />
-                <Panel id="cmHeroesCover" class="hBlock vBlock isCover"></Panel>
+                <!-- <Panel id="cmHeroesCover" class="hBlock vBlock isCover"></Panel> -->
             </Panel>
 
             <Panel id="cmSelection" class="vBlock">

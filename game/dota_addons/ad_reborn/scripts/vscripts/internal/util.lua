@@ -1,3 +1,63 @@
+function PrecacheHeroItems( name, path, context )
+  print("----------------------------------------Precache Hero Start----------------------------------------") --для консоли
+
+  local wearablesList = {} --"переменная для надеваемых шмоток(для всех героев)"
+  local precacheWearables = {} --"переменная только для шмоток нужного героя"
+  local precacheParticle = {}
+  for k, v in pairs(path) do --лезем в файл, достаем шмоточки
+    if k == 'items' then
+      wearablesList = v
+    end
+  end
+  local counter = 0 -- всякие счетчики
+  local counter_particle = 0
+  local value
+  for k, v in pairs(wearablesList) do -- "выбираем из списка предметов только предметы на нужных героев"
+    if IsForHero(name, wearablesList[k]) then
+      if wearablesList[k]["model_player"] then
+        value = wearablesList[k]["model_player"] 
+        precacheWearables[value] = true
+      end
+      if wearablesList[k]["particle_file"] then -- "прекешируем еще и частицы, куда ж без них!"
+        value = wearablesList[k]["particle_file"] 
+        precacheParticle[value] = true
+      end
+    end
+  end
+
+--"собственно само прекеширование всех занесенных в список шмоток"
+  for wearable,_ in pairs( precacheWearables ) do
+    print("Precache model: " .. wearable)
+    PrecacheResource( "model", wearable, context )
+    counter = counter + 1
+  end
+
+--"и прекеширование частиц"
+  for wearable,_ in pairs( precacheParticle ) do
+    print("Precache particle: " .. wearable)
+    PrecacheResource( "particle", wearable, context )
+    counter_particle = counter_particle + 1
+  end
+
+ -- "прекешируем саму модель героя! иначе будут бегать шмотки без тела"
+  -- PrecacheUnitByNameSync(name, context)
+  PrecacheUnitByNameAsync(name, function(...) end)
+    
+    print('[Precache]' .. counter .. " models loaded and " .. counter_particle .." particles loaded")
+    print('[Precache] End')
+
+end
+
+-- "привет от вашего друга, индийского быдлокодера работающего за еду"
+function IsForHero(str, tbl)
+  if type(tbl["used_by_heroes"]) ~= type(1) and tbl["used_by_heroes"] then 
+    if tbl["used_by_heroes"][str] then
+      return true
+    end
+  end
+  return false
+end
+
 function HasAbilities( hero, abilities_table )
   for _, ab in pairs( abilities_table ) do
     if hero:HasAbility( ab ) then

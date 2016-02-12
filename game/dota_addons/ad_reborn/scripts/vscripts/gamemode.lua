@@ -31,7 +31,6 @@ require('settings')
 -- events.lua is where you can specify the actions to be taken when any event occurs and is one of the core barebones files.
 require('events')
 
-
 --[[
   This function should be used to set up Async precache calls at the beginning of the gameplay.
 
@@ -79,30 +78,29 @@ end
   The hero parameter is the hero entity that just spawned in
 ]]
 function GameMode:OnHeroInGame(hero)
-  -- DebugPrint("[BAREBONES] Hero spawned in game for first time -- " .. hero:GetUnitName())
+    -- DebugPrint("[BAREBONES] Hero spawned in game for first time -- " .. hero:GetUnitName())
 
-  -- This line for example will set the starting gold of every hero to 500 unreliable gold
-  -- hero:SetGold(500, false)
+    -- This line for example will set the starting gold of every hero to 500 unreliable gold
+    -- hero:SetGold(500, false)
 
-  -- These lines will create an item and add it to the player, effectively ensuring they start with the item
-  -- local item = CreateItem("item_example_item", hero, hero)
-  -- hero:AddItem(item)
+    -- These lines will create an item and add it to the player, effectively ensuring they start with the item
+    -- local item = CreateItem("item_example_item", hero, hero)
+    -- hero:AddItem(item)
 
-  --[[ --These lines if uncommented will replace the W ability of any hero that loads into the game
+    --[[ --These lines if uncommented will replace the W ability of any hero that loads into the game
     --with the "example_ability" ability
 
-  local abil = hero:GetAbilityByIndex(1)
-  hero:RemoveAbility(abil:GetAbilityName())
-  hero:AddAbility("example_ability")]]
+    local abil = hero:GetAbilityByIndex(1)
+    hero:RemoveAbility(abil:GetAbilityName())
+    hero:AddAbility("example_ability")]]
 
-  local team = hero:GetTeamNumber()
-  local player = hero:GetPlayerOwner()
-  local pID = player:GetPlayerID()
+    local team = hero:GetTeamNumber()
+    local player = hero:GetPlayerOwner()
+    local pID = player:GetPlayerID()
 
-  if pID >= 0 then
-    GameMode:CreateAbilitiesForHero(hero, pID)
-  end
-  
+    if pID >= 0 then
+        GameMode:CreateAbilitiesForHero( hero, pID )
+    end
 end
 
 --[[
@@ -126,52 +124,56 @@ function GameMode:InitGameMode()
   GameMode:_InitGameMode()
 
   -- Commands can be registered for debugging purposes or as functions that can be called by the custom Scaleform UI
-  Convars:RegisterCommand( "command_example", Dynamic_Wrap(GameMode, 'ExampleConsoleCommand'), "A console command example", FCVAR_CHEAT )
+  -- Convars:RegisterCommand( "command_example", Dynamic_Wrap(GameMode, 'ExampleConsoleCommand'), "A console command example", FCVAR_CHEAT )
 
-  -- KeyValues --
-  GameMode.HeroesKV = LoadKeyValues("scripts/kv/adcm_herolist.txt")
-  GameMode.StatesKV = LoadKeyValues("scripts/kv/adcm_states.txt")
-  GameMode.AbilitiesKV = LoadKeyValues("scripts/kv/adcm_abilities.txt")
-  GameMode.SubAbilitiesKV = LoadKeyValues("scripts/kv/adcm_abilities_deps.txt")
-  GameMode.AbilitiesBashKV = LoadKeyValues("scripts/kv/adcm_abilities_bash.txt")
-  --GameMode.Resources = LoadKeyValues("scripts/items/items_game.txt")--default dota file
+  -- KeyValues
+  self.HeroesKV = LoadKeyValues("scripts/kv/adcm_herolist.txt")
+  self.StatesKV = LoadKeyValues("scripts/kv/adcm_states.txt")
+  self.AbilitiesKV = LoadKeyValues("scripts/kv/adcm_abilities.txt")
+  self.SubAbilitiesKV = LoadKeyValues("scripts/kv/adcm_abilities_deps.txt")
+  self.AbilitiesBashKV = LoadKeyValues("scripts/kv/adcm_abilities_bash.txt")
+  self.Items = LoadKeyValues("scripts/items/items_game.txt")--default dota file
 
-  -- Storage --
-  GameMode.PlayersQueue = {}
-  GameMode.EnemyIsReady = 0
-  GameMode.PlayersCount = 0
+  -- Storage
+  self.PlayersQueue = {}
+  self.EnemyIsReady = 0
+  self.PlayersCount = {}
 
+  -- Timers
   ResetCmTimer()
-  GameMode.TimeCmReserve = { 110, 110 }
-  GameMode.TimeAp = 30
-  GameMode.TimeAd = 30
+  self.TimeCmReserve = { 110, 110 }
+  self.TimeAp = 30
+  self.TimeAd = 30
 
-  -- Create custom net tables (SETTINGS) --
-  CreateNetTablesSettings()
+  -- Create custom net tables (SETTINGS)
+  self:CreateNetTablesSettings()
 
-  -- Register listeners for events from Panorama --
+  -- Register listeners for events from Panorama
   CustomGameEventManager:RegisterListener("CmButtonPressed", Dynamic_Wrap(GameMode, 'OnCmButtonPressed'))
   CustomGameEventManager:RegisterListener("ChooseAbility", Dynamic_Wrap(GameMode, 'OnChooseAbility'))
 
-  GameRules:GetGameModeEntity():SetExecuteOrderFilter(Dynamic_Wrap(GameMode,"FilterExecuteOrder"),self)
+  LinkLuaModifier( "berserkers_rage_bonus_range_modifier", "heroes/troll_warlord/berserkers_rage_bonus_range_modifier", LUA_MODIFIER_MOTION_NONE)
+
+  GameRules:GetGameModeEntity():SetExecuteOrderFilter( Dynamic_Wrap( GameMode, "FilterExecuteOrder" ), self )
+  GameRules:GetGameModeEntity():SetModifyGoldFilter( Dynamic_Wrap( GameMode, "FilterModifyGold" ), self )
 
   DebugPrint('[BAREBONES] Done loading Barebones gamemode!\n\n')
 end
 
 -- This is an example console command
-function GameMode:ExampleConsoleCommand()
-  print( '******* Example Console Command ***************' )
-  local cmdPlayer = Convars:GetCommandClient()
-  if cmdPlayer then
-    local playerID = cmdPlayer:GetPlayerID()
-    if playerID ~= nil and playerID ~= -1 then
-      -- Do something here for the player who called this command
-      PlayerResource:ReplaceHeroWith(playerID, "npc_dota_hero_viper", 1000, 1000)
-    end
-  end
+-- function GameMode:ExampleConsoleCommand()
+--   print( '******* Example Console Command ***************' )
+--   local cmdPlayer = Convars:GetCommandClient()
+--   if cmdPlayer then
+--     local playerID = cmdPlayer:GetPlayerID()
+--     if playerID ~= nil and playerID ~= -1 then
+--       -- Do something here for the player who called this command
+--       PlayerResource:ReplaceHeroWith(playerID, "npc_dota_hero_viper", 1000, 1000)
+--     end
+--   end
 
-  print( '*********************************************' )
-end
+--   print( '*********************************************' )
+-- end
 
 --------------------------------------------------------------------------------------
 
@@ -185,137 +187,143 @@ end
 
 --------------------------------------------------------------------------------------
 
-function CreateNetTablesSettings()
+function GameMode:CreateNetTablesSettings()
     CustomNetTables:SetTableValue( "currentstate", "state", { 0, 0 } )
-  
+
     -- CM queue pick/ban
-    for key,value in pairs(GameMode.StatesKV) do
+    for key,value in pairs(self.StatesKV) do
         CustomNetTables:SetTableValue("gamestate", key, value)
     end
 
-  -- Teams picks/bans
-  local _ta = {}
-  local _tb = {}
+    -- Teams picks/bans
+    local _ta = {}
+    local _tb = {}
 
-  for i=2,3 do --teams
+    for i=2,3 do --teams
 
-    _ta = {}
+        _ta = {}
 
-    for j=1,2 do --phase
+        for j=1,2 do --phase
 
-      _tb = {}
+            _tb = {}
 
-      for k=1,6 do --slot
+            for k=1,6 do --slot
 
-        table.insert(_tb, {
-          heroName = "",
-          isEnabled = false
-        })
+                table.insert(_tb, {
+                    heroName = "",
+                    isEnabled = false
+                })
 
-      end
+            end
 
-      table.insert(_ta, _tb)
+            table.insert(_ta, _tb)
+
+        end
+
+        CustomNetTables:SetTableValue("teams", tostring(i), _ta)
 
     end
-    
-    CustomNetTables:SetTableValue("teams", tostring(i), _ta)
 
-  end
+    -- Are all players ready for AD?
+    CustomNetTables:SetTableValue("settings", "adReadyCount", {0})
+    CustomNetTables:SetTableValue("settings", "2", { freeHero = "" })
+    CustomNetTables:SetTableValue("settings", "3", { freeHero = "" })
 
-  -- CustomNetTables:SetTableValue("settings", "currentSlot", {0})
+    -- Hero pool
+    for group, heroes in pairs( self.HeroesKV ) do
+        CustomNetTables:SetTableValue( "heroes", group, heroes )
+    end
 
-  -- Are all players ready for AD?
-  CustomNetTables:SetTableValue("settings", "adReadyCount", {0})
-  CustomNetTables:SetTableValue("settings", "2", { freeHero = "" })
-  CustomNetTables:SetTableValue("settings", "3", { freeHero = "" })
-
-  -- Hero pool
-  for group, heroes in pairs(GameMode.HeroesKV) do
-    CustomNetTables:SetTableValue("heroes", group, heroes)
-  end
-
-
-  -- Abilities for AD
-  for heroName, abilityKV in pairs(GameMode.AbilitiesKV) do
-    CustomNetTables:SetTableValue("abilities", heroName, abilityKV)
-  end
+    -- Abilities for AD
+    for heroName, abilityKV in pairs( self.AbilitiesKV ) do
+        CustomNetTables:SetTableValue( "abilities", heroName, abilityKV )
+    end
 end
 
+----------------------
 -- Events for Panorama
+----------------------
 function GameMode:CreateAdcmData()
-  for _team = DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS do
-    GameMode.PlayersCount = GameMode.PlayersCount + PlayerResource:GetPlayerCountForTeam( _team )
-  end
+    self.PlayersCount = {
+        radiant = PlayerResource:GetPlayerCountForTeam( DOTA_TEAM_GOODGUYS ),
+        dire = PlayerResource:GetPlayerCountForTeam( DOTA_TEAM_BADGUYS ),
+        all = ( PlayerResource:GetPlayerCountForTeam( DOTA_TEAM_GOODGUYS ) + PlayerResource:GetPlayerCountForTeam( DOTA_TEAM_BADGUYS ) )
+    }
 
-  local tempID = 0
+    -- Current state
+    DebugPrint("Map name: " .. GetMapName())
 
-  -- Current state
-  DebugPrint("Map name: " .. GetMapName())
-  if GetMapName() == MAP_CM then
-    EmitAnnouncerSound( "announcer_announcer_type_capt_mode" )
-  elseif GetMapName() == MAP_AP then
-    CustomNetTables:SetTableValue( "currentstate", "state", { ADCM_NUMBER_OF_STATES + 1, 0 } )
-    EmitAnnouncerSound( "announcer_announcer_type_all_pick" )
-    Timers:CreateTimer("StartApState", {
-      useGameTime = false,
-      endTime = 2.0,
-      callback = function()
-        EmitAnnouncerSound( "announcer_announcer_choose_hero" )
-        StartApTimer()
-      end
-    })
-  end
+    if GetMapName() == MAP_CM then
 
-  -- Players data
-  for i=2,3 do
-    for j=1,5 do
-      tempID = PlayerResource:GetNthPlayerIDOnTeam(i, j)
-      if tempID >= 0 then
-        CustomNetTables:SetTableValue("players", tostring(tempID), {})
-        AddToCustomNetTables("players", tempID, "isCaptain", 0) -- util.lua
-        AddToCustomNetTables("players", tempID, "hero", "")
+        EmitAnnouncerSound( "announcer_announcer_type_capt_mode" )
 
-        for k=1,SUB_ABILITY_SLOTS do
-          AddToCustomNetTables("players", tempID, k, "")
-          AddToCustomNetTables("players", tempID, "sub" .. k, "")
-        end
-      end
+    elseif GetMapName() == MAP_AP then
+
+        CustomNetTables:SetTableValue( "currentstate", "state", { ADCM_NUMBER_OF_STATES + 1, 0 } )
+
+        EmitAnnouncerSound( "announcer_announcer_type_all_pick" )
+
+        Timers:CreateTimer("StartApState", {
+            useGameTime = false,
+            endTime = 2.0,
+            callback = function()
+
+                EmitAnnouncerSound( "announcer_announcer_choose_hero" )
+                StartApTimer()
+
+            end
+        })
+
     end
-  end
 
-  -- Players queue for AD
-  tempID = 0
-  for i=1,4 do
-    if i==1 or i==3 then
-      for j=1,5 do
-        for k=2,3 do
-          tempID = PlayerResource:GetNthPlayerIDOnTeam(k, j)
-          if (tempID >= 0) then
-            table.insert(GameMode.PlayersQueue, {
-              playerID = tempID,
-              finished = 1
-            })
-          end
+    -- Players data
+    local tempID = 0
+    for i=2,3 do
+        for j=1,5 do
+            tempID = PlayerResource:GetNthPlayerIDOnTeam(i, j)
+            if tempID >= 0 then
+                CustomNetTables:SetTableValue("players", tostring(tempID), {})
+                AddToCustomNetTables("players", tempID, "isCaptain", 0) -- util.lua
+                AddToCustomNetTables("players", tempID, "hero", "")
+
+                for k=1,SUB_ABILITY_SLOTS do
+                    AddToCustomNetTables("players", tempID, k, "")
+                    AddToCustomNetTables("players", tempID, "sub" .. k, "")
+                end
+            end
         end
-      end
-    else
-      for j=5,1,-1 do
-        for k=3,2,-1 do
-          tempID = PlayerResource:GetNthPlayerIDOnTeam(k, j)
-          if (tempID >= 0) then
-            table.insert(GameMode.PlayersQueue, {
-              playerID = tempID,
-              finished = 1
-            })
-          end
-        end
-      end
     end
-  end
 
-  for qId, qValue in pairs(GameMode.PlayersQueue) do
-    CustomNetTables:SetTableValue("adQueue", tostring(qId), qValue)
-  end
+    -- Players queue for AD
+    for i=1,4 do
+        if i==1 or i==3 then
+            for j=1,5 do
+                for k=2,3 do
+                    AddPlayerIdToAdQueue( k, j )
+                end
+            end
+        else
+            for j=5,1,-1 do
+                for k=3,2,-1 do
+                    AddPlayerIdToAdQueue( k, j )
+                end
+            end
+        end
+    end
+
+    for qId, qValue in pairs( self.PlayersQueue ) do
+        CustomNetTables:SetTableValue( "adQueue", tostring( qId ), qValue )
+    end
+end
+
+function AddPlayerIdToAdQueue( team, slot )
+    local tempID = PlayerResource:GetNthPlayerIDOnTeam( team, slot )
+    if ( tempID >= 0 ) then
+        table.insert( GameMode.PlayersQueue, {
+            playerID = tempID,
+            finished = 1
+        })
+    end
 end
 
 function GameMode:OnCmButtonPressed( keys )
@@ -368,22 +376,19 @@ function GameMode:OnCmButtonPressed( keys )
 
             local position = tostring( heroInfo.heroPosition )
             local _table_phase = GetFromCustomNetTables( "teams", teamID, 2 )
-            -- print(position)
             -- disable selected hero
             _table_phase[ position ].isEnabled = false
-            -- print(_table_phase[ position ].isEnabled)
             AddToCustomNetTables( "teams", teamID, 2, _table_phase )
 
         elseif GetMapName() == MAP_AP then
 
-            DisableHeroInHeroTable( heroInfo )
+            DisableHeroInHeroTable( heroInfo, GameMode.Context )
 
         end
 
-        -- local player = PlayerResource:GetPlayer( pID )
         CustomGameEventManager:Send_ServerToAllClients( "UpdateCmHud", {} )
 
-        if adReadyCount == GameMode.PlayersCount then
+        if adReadyCount == GameMode.PlayersCount.all then
             Timers:CreateTimer( "start_AD", {
                 useGameTime = false,
                 endTime = 0.01,
@@ -409,8 +414,6 @@ function StartNextState( currentState, heroInfo )
 
     if type( heroInfo ) == "table" then
 
-        DisableHeroInHeroTable( heroInfo )
-
         local stateInfo = GetStateInfo( currentState )
         local _table_phase = GetFromCustomNetTables( "teams", stateInfo.team, stateInfo.phase )
 
@@ -420,6 +423,12 @@ function StartNextState( currentState, heroInfo )
                 AddToCustomNetTables( "teams", stateInfo.team, stateInfo.phase, _table_phase )
                 break
             end
+        end
+
+        if stateInfo.phase == 1 then
+            DisableHeroInHeroTable( heroInfo )
+        else
+            DisableHeroInHeroTable( heroInfo, GameMode.Context )
         end
 
     end
@@ -473,11 +482,20 @@ function GetStateInfo( state )
     return data
 end
 
-function DisableHeroInHeroTable( heroInfo )
+function DisableHeroInHeroTable( heroInfo, context )
     local _table_hero = GetFromCustomNetTables( "heroes", heroInfo.heroGroup, heroInfo.heroId )
+
     for name, isEnabled in pairs( _table_hero ) do
+
         _table_hero[ name ] = 0
+
+        if context then
+            local heroName = "npc_dota_hero_" .. name
+            PrecacheHeroItems( heroName, GameMode.Items, context )
+        end
+
     end
+
     AddToCustomNetTables( "heroes", heroInfo.heroGroup, heroInfo.heroId, _table_hero )
 end
 
@@ -563,7 +581,6 @@ end
 
 function StartApTimer()
     -- DebugPrint("StartApTimer")
-    -- ADCM_AP_TIME_MAIN = 30
 
     Timers:CreateTimer( "apTimer", {
         useGameTime = false,
@@ -691,7 +708,7 @@ function GameMode:StartAbilityDraft()
                     local ab = GetFromCustomNetTables( "abilities", heroName, abSlot )
                     table.insert(_t, {
                         abName = ab,
-                        isEnabled = true
+                        isEnabled = 1
                     })
                 end
 
@@ -719,6 +736,9 @@ function SetFreeHero( team, heroName )
 
     AddToCustomNetTables( "teams", team, 2, _table )
     AddToCustomNetTables( "settings", team, "freeHero", heroName )
+    PrecacheUnitByNameAsync( "npc_dota_hero_" .. heroName, function()
+        CreateUnitByName( "npc_dota_hero_" .. heroName, Vector(-10000, -10000, 0), false, nil, nil, 0)
+    end )
 end
 
 function GameMode:OnChooseAbility( keys )
@@ -750,7 +770,7 @@ function GameMode:OnChooseAbility( keys )
     local abPosition = keys.position
     local abIsUlt = keys.isUlt
 
-    local slot = math.ceil( currentState / GameMode.PlayersCount )
+    local slot = math.ceil( currentState / GameMode.PlayersCount.all )
 
     if abIsUlt == 1 then
         slot = abPosition
@@ -784,7 +804,7 @@ function GameMode:OnChooseAbility( keys )
     end
 
     local _t = GetFromCustomNetTables( "abilitiesEnabled", keys.ownerId, abPosition )
-    _t.isEnabled = false
+    _t.isEnabled = 0
     AddToCustomNetTables("abilitiesEnabled", keys.ownerId, abPosition, _t)
 
     AddToCustomNetTables("adQueue", currentState, "finished", 1)
@@ -815,21 +835,17 @@ function GetRandomAbility( bIsUlt )
         position = 4
     end
 
-    local _isEnabled = GetFromCustomNetTables( "abilitiesEnabled", pID, position )
-    local isEnabled = _isEnabled.isEnabled
-    if isEnabled == 0 then
+    local _table = GetFromCustomNetTables( "abilitiesEnabled", pID, position )
+    if _table.isEnabled == 0 then
         return GetRandomAbility( bIsUlt )
     else
-        local _abName = GetFromCustomNetTables( "abilitiesEnabled", pID, position )
-        local abName = _abName.abName
-        local data = {
-            name = abName,
+        return {
+            name = _table.abName,
             position = position,
             isUlt = bIsUlt,
             ownerId = pID,
             ownerTeam = team
         }
-        return data
     end
 end
 
@@ -886,188 +902,264 @@ function StartAdTimer()
 end
 
 function GameMode:OnPreGame()
-  local pID, heroName, player, slot = nil
-  for i=2,3 do
-    for j=1,6 do
-      if j < 6 then
-        pID = PlayerResource:GetNthPlayerIDOnTeam(i, j)
-        if pID >= 0 then
-          heroName = "npc_dota_hero_" .. GetFromCustomNetTables("players", pID, "hero")
-          player = PlayerResource:GetPlayer(pID)
-          PrecacheOnPreGame(heroName, player, pID)
+    for team = DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS do
+        for slot = 1, 5 do
+            local pID = PlayerResource:GetNthPlayerIDOnTeam( team, slot )
+            if pID >= 0 then
+                local heroName = "npc_dota_hero_" .. GetFromCustomNetTables( "players", pID, "hero" )
+                local player = PlayerResource:GetPlayer( pID )
+                CreateHeroForPlayer( heroName, player )
+            end
         end
-      else
-        slot = GetFromCustomNetTables("teams", i, 2)
-        for k=1,6 do
-          if slot[tostring(k)]["isEnabled"] == 1 then
-            heroName = "npc_dota_hero_" .. slot[tostring(k)]["heroName"]
-            PrecacheOnPreGame(heroName)
-            break
-          end
-        end
-      end
     end
-  end
-end
-
-function PrecacheOnPreGame( heroName, player, pID )
-  if player ~= nil and pID ~= nil then
-    PrecacheUnitByNameAsync( heroName, function()
-      CreateHeroForPlayer( heroName, player )
-    end, pID )
-  else
-    PrecacheUnitByNameAsync( heroName, function()
-      CreateUnitByName( heroName, Vector( -10000, -10000, 0 ), false, nil, nil, 0 )
-    end )
-  end
 end
 
 function GameMode:CreateAbilitiesForHero( hero, pID, originalEntity )
-  local abCount = hero:GetAbilityCount() - 1
-  for i = 0, abCount do
-    local ab = hero:GetAbilityByIndex(i)
-    if ab and not ab:IsAttributeBonus() then
-      local abOld = ab:GetAbilityName()
-      hero:RemoveAbility(abOld)
+    RemoveAbilitiesFromHero( hero )
+
+    local abs = GetAbilitiesForPlayer( pID )
+    local absHidden = {}
+
+    local abSibling = "troll_warlord_whirling_axes_melee"
+    table.insert( absHidden, abSibling )
+    table.insert( absHidden, INCREASE_ABILITY_LAYOUT )
+
+    if #abs > 4 then
+        for slot = 5, #abs do
+            table.insert( absHidden, abs[ slot ] )
+        end
     end
-  end
 
-  local _slot = 0
-
-  for j = 1, 3 do -- 1st, 2nd, 3rd abilities
-    AddAbilityToHero( hero, pID, originalEntity, j )
-  end
-  
-  for k = 1, SUB_ABILITY_SLOTS do -- 4th hidden subability for aghanim
-    local subAb = GetFromCustomNetTables( "players", pID, "sub" .. k )
-    if subAb and subAb == INCREASE_ABILITY_LAYOUT then
-      AddAbilityToHero( hero, pID, originalEntity, k + 1, true, true )
-      _slot = k + 1
-      break
+    for slot = 1, #abs do
+        if abs[ slot - 1 ] and abs[ slot - 1 ] == INCREASE_ABILITY_LAYOUT then
+            table.insert( abs, 4, abs[ slot ] )
+            table.remove( abs, slot + 1 )
+            break
+        end
     end
-  end
 
-  AddAbilityToHero( hero, pID, originalEntity, 4 ) -- ult (4th or 5th ability)
-
-  for l = 1, SUB_ABILITY_SLOTS do -- other subabilities
-    local _subAb = GetFromCustomNetTables( "players", pID, "sub" .. l )
-    if _subAb ~= "" and l ~= _slot then
-      AddAbilityToHero( hero, pID, originalEntity, l, true )
+    for slot = 1, #abs do
+        local abSub = GameMode.SubAbilitiesKV[ abs[ slot ] ]
+        if abSub and abSub == abSibling then
+            for _i, spell in ipairs( abs ) do
+                if spell == abSibling then
+                    table.insert( abs, slot + 1, spell)
+                    table.remove( abs, _i + 1 )
+                    break
+                end
+            end
+        end
     end
-  end
 
-  FixAbilities( hero, pID, originalEntity )
+    for i, ab in ipairs( abs ) do
+        local isHidden = false
+
+        for _i, spell in ipairs( absHidden ) do
+            if ab == spell then
+                isHidden = true
+            end
+        end
+
+        AddAbilityToHero( hero, originalEntity, ab, isHidden )
+    end
+
+    FixAbilities( hero, originalEntity )
 end
 
-function AddAbilityToHero( hero, pID, originalEntity, slot, subAbility, hidden )
-  local _slot
-  if subAbility then
-    _slot = "sub" .. slot
-  else
-    _slot = slot
-  end
+function RemoveAbilitiesFromHero( hero )
+    local abCount = hero:GetAbilityCount() - 1
+    for i = 0, abCount do
+        local ab = hero:GetAbilityByIndex( i )
+        if ab and not ab:IsAttributeBonus() then
+            hero:RemoveAbility( ab:GetAbilityName() )
+        end
+    end
+end
 
-  local abName = GetFromCustomNetTables("players", pID, _slot)
+function GetAbilitiesForPlayer( pID )
+    local abs = {}
 
-  local level = 0
-  if originalEntity then
-    level = originalEntity:FindAbilityByName( abName ):GetLevel()
-  end
+    for i = 1, 4 do
+        table.insert( abs, GetFromCustomNetTables( "players", pID, i ) )
+    end
 
-  local abNew = hero:AddAbility( abName )
+    for j = 1, SUB_ABILITY_SLOTS do
+        local abSub = GetFromCustomNetTables( "players", pID, "sub" .. j )
+        if abSub ~= "" then
+            table.insert( abs, GetFromCustomNetTables( "players", pID, "sub" .. j ) )
+        else
+            break
+        end
+    end
 
-  if abNew:GetMaxLevel() == 1 then
-    level = 1
-  end
+    return abs
+end
 
-  abNew:SetLevel( level )
+function AddAbilityToHero( hero, originalEntity, abName, isHidden )
+    -- DebugPrint(abName)
+    local abNew = hero:AddAbility( abName )
 
-  if hidden or abName == INCREASE_ABILITY_LAYOUT then
-    abNew:SetHidden( true )
-  end
+    local level = 0
+    if originalEntity then
+        level = originalEntity:FindAbilityByName( abName ):GetLevel()
+    end
 
-  if level == 0 then
-    FixModifiers( hero, abName )
-  end
+    if abNew:GetMaxLevel() == 1 then
+        level = 1
+    end
+
+    abNew:SetLevel( level )
+
+    if level == 0 then
+        FixModifiers( hero, abName )
+    end
+
+    abNew:SetHidden( isHidden )
 end
 
 function FixModifiers( hero, ability )
-  local modName = "modifier_" .. ability
-  local auraName = "modifier_" .. ability .. "_aura"
+    local modName = "modifier_" .. ability
+    local auraName = "modifier_" .. ability .. "_aura"
 
-  if hero:HasModifier( modName ) then
-    hero:RemoveModifierByName( modName )
-  end
-  
-  if hero:HasModifier( auraName ) then
-    hero:RemoveModifierByName( auraName )
-  end
+    if hero:HasModifier( modName ) then
+        hero:RemoveModifierByName( modName )
+    end
+
+    if hero:HasModifier( auraName ) then
+        hero:RemoveModifierByName( auraName )
+    end
 end
 
-function FixAbilities( hero, pID, originalEntity )
-  local int_steal = nil
-  local int_steal_modifier = "modifier_silencer_int_steal"
-  local ability_glaives = "silencer_glaives_of_wisdom"
+function FixAbilities( hero, originalEntity )
+    local int_steal = nil
+    local modifier_int_steal = "modifier_silencer_int_steal"
+    local ability_glaives = "silencer_glaives_of_wisdom"
   
-  Timers:CreateTimer(0, function()
-    local abCount = hero:GetAbilityCount() - 1
-    for i = 0, abCount do
-      local ab = hero:GetAbilityByIndex( i )
-      if ab then
-        local abName = ab:GetAbilityName()
-        local subAb = GameMode.SubAbilitiesKV[ abName ]
+    Timers:CreateTimer(0, function()
 
-        --fix wtf auto upgrade ancient apparation ice blast
-        if not originalEntity and subAb and ab:GetLevel() > 0 then
-          ab:SetLevel( 0 )
+        local abCount = hero:GetAbilityCount() - 1
+
+        for i = 0, abCount do
+
+            local ab = hero:GetAbilityByIndex( i )
+
+            if ab then
+
+                local abName = ab:GetAbilityName()
+                local subAb = GameMode.SubAbilitiesKV[ abName ]
+
+                --fix wtf auto upgrade ancient apparation ice blast
+                if not originalEntity and subAb and ab:GetLevel() > 0 then
+                    ab:SetLevel( 0 )
+                end
+
+                --fix silencer's int steal
+                if abName == ability_glaives then
+                    int_steal = true
+                end
+
+            end
         end
 
-        --fix silencer's int steal
-        if abName == ability_glaives then
-          int_steal = true
+        if hero:HasModifier( modifier_int_steal ) then
+            hero:RemoveModifierByName( modifier_int_steal )
         end
 
-      end
-    end
+        if int_steal and not hero:HasModifier( modifier_int_steal ) then
+            hero:AddNewModifier( hero, nil, modifier_int_steal, { duration = -1 } )
+        end
 
-    if hero:HasModifier( int_steal_modifier ) then
-      hero:RemoveModifierByName( int_steal_modifier )
-    end
-    if int_steal then
-      if not hero:HasModifier( int_steal_modifier ) then
-        hero:AddNewModifier( hero, nil, int_steal_modifier, { duration = -1 } )
-      end
-    end
-  end)
+    end)
+
 end
 
 function GameMode:FilterExecuteOrder( filterTable )
-  -- for k, v in pairs(filterTable) do
-  --   print(k, v)
-  -- end
+    -- for k, v in pairs(filterTable) do
+    --   print(k, v)
+    --   DebugPrintTable(v)
+    -- end
 
-  local ability = filterTable[ "entindex_ability" ]
+    local ability = filterTable[ "entindex_ability" ]
 
-  if ability > 0 then
-    local order = filterTable[ "order_type" ]
-    
-    if order == DOTA_UNIT_ORDER_DROP_ITEM or order == DOTA_UNIT_ORDER_GIVE_ITEM or order == DOTA_UNIT_ORDER_SELL_ITEM then
-      local ab = EntIndexToHScript( ability )
-      local units_table = filterTable[ "units" ]
-      local scepter_name = "item_ultimate_scepter"
-      
-      for _, hero in pairs(units_table) do
-        if ab:GetAbilityName() == scepter_name then
-          local _ab = EntIndexToHScript( hero ):FindAbilityByName( INCREASE_ABILITY_LAYOUT )
+    if ability > 0 then
 
-          if _ab then
-            return nil
-          end
+        local order = filterTable[ "order_type" ]
+
+        if order == DOTA_UNIT_ORDER_DROP_ITEM or order == DOTA_UNIT_ORDER_GIVE_ITEM or order == DOTA_UNIT_ORDER_SELL_ITEM then
+
+            local ab = EntIndexToHScript( ability )
+            local scepter_name = "item_ultimate_scepter"
+
+            -- for _, hero in pairs(units_table) do
+            if ab:GetAbilityName() == scepter_name then
+                local hero = EntIndexToHScript( filterTable[ "units" ][ "0" ] )
+                local _ab = hero:FindAbilityByName( INCREASE_ABILITY_LAYOUT )
+                if _ab then
+                    return nil
+                end
+            end
+            -- end
+
+        elseif order == DOTA_UNIT_ORDER_CAST_TOGGLE then
+
+            local ab = EntIndexToHScript( ability )
+            local ability_name = "troll_warlord_berserkers_rage"
+            if ab:GetAbilityName() == ability_name then
+
+                local hero = EntIndexToHScript( filterTable[ "units" ][ "0" ] )
+
+                local modifier_name = "modifier_" .. ability_name
+                local modifier_name_fix = "berserkers_rage_bonus_range_modifier"
+
+                if not hero:HasModifier( modifier_name ) then
+                    local attack_range = hero:GetAttackRange()
+                    hero:AddNewModifier( hero, nil, modifier_name_fix, { range = attack_range } )
+                else
+                    hero:RemoveModifierByName( modifier_name_fix )
+                end
+
+            end
+
         end
 
-      end
     end
-  end
 
-  return true
+    return true
+end
+
+function GameMode:FilterModifyGold( filterTable )
+    -- for k, v in pairs(filterTable) do
+    --     print(k, v)
+    -- end
+
+    local playerID = filterTable.player_id_const
+    local teamID = PlayerResource:GetTeam( playerID )
+
+    if PlayerResource:GetConnectionState( playerID ) == DOTA_CONNECTION_STATE_ABANDONED then
+        return
+    end
+
+    local myTeam = 1
+    local enemyTeam = 1
+
+    if teamID == DOTA_TEAM_GOODGUYS then
+
+        myTeam = self.PlayersCount.radiant
+        enemyTeam = self.PlayersCount.dire
+
+    elseif teamID == DOTA_TEAM_BADGUYS then
+
+        myTeam = self.PlayersCount.dire
+        enemyTeam = self.PlayersCount.radiant
+
+    end
+
+    local ratio = enemyTeam / myTeam
+
+    if ratio < 1 then
+        ratio = 1 - ( 1 - ratio ) / 2
+        filterTable.gold = math.ceil( filterTable.gold * ratio )
+    end
+
+    return true
 end

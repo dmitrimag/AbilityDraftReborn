@@ -121,7 +121,7 @@ end
 
 -- A player leveled up an ability
 function GameMode:OnPlayerLearnedAbility( keys )
-  DebugPrint('[BAREBONES] OnPlayerLearnedAbility')
+  -- DebugPrint('[BAREBONES] OnPlayerLearnedAbility')
   -- DebugPrintTable(keys)
 
   local player = EntIndexToHScript(keys.player)
@@ -143,9 +143,149 @@ function GameMode:OnPlayerLearnedAbility( keys )
   end
 end
 
+-- Cleanup a player when they leave
+function GameMode:OnDisconnect(keys)
+    DebugPrint('[BAREBONES] Player Disconnected ' .. tostring(keys.userid))
+    -- DebugPrintTable(keys)
+    -- local name = keys.name
+    -- local networkid = keys.networkid
+    -- local reason = keys.reason
+    -- local userid = keys.userid
+    if GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS then
+        GameMode:RecalculatePlayersCount()
+    end
+end
+
+-- This function is called once when the player fully connects and becomes "Ready" during Loading
+function GameMode:OnConnectFull(keys)
+  DebugPrint('[BAREBONES] OnConnectFull')
+  -- DebugPrintTable(keys)
+  GameMode:_OnConnectFull(keys)
+  -- local entIndex = keys.index+1
+  -- The Player entity of the joining user
+  -- local ply = EntIndexToHScript(entIndex)
+  -- The Player ID of the joining player
+  -- local playerID = ply:GetPlayerID()
+  if GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS then
+        GameMode:RecalculatePlayersCount()
+    end
+end
+
+-- This function is called 1 to 2 times as the player connects initially but before they 
+-- have completely connected
+function GameMode:PlayerConnect(keys)
+  DebugPrint('[BAREBONES] PlayerConnect')
+  -- DebugPrintTable(keys)
+  if GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS then
+        GameMode:RecalculatePlayersCount()
+    end
+end
+
+function GameMode:RecalculatePlayersCount()
+    self.PlayersCount.radiant = 0
+    self.PlayersCount.dire = 0
+
+    for teamID = DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS do
+        for slot = 1, 5 do
+            local pID = PlayerResource:GetNthPlayerIDOnTeam( teamID, slot )
+
+            if pID >= 0 then
+
+                local connectionState = PlayerResource:GetConnectionState(pID)
+
+                if connectionState == DOTA_CONNECTION_STATE_CONNECTED then
+
+                    if teamID == DOTA_TEAM_GOODGUYS then
+                        self.PlayersCount.radiant = self.PlayersCount.radiant + 1
+                    elseif teamID == DOTA_TEAM_BADGUYS then
+                        self.PlayersCount.dire = self.PlayersCount.dire + 1
+                    end
+
+                elseif connectionState == DOTA_CONNECTION_STATE_DISCONNECTED then
+
+                    local timer_name = "timer_abandoned_player_"..pID
+                    if Timers.timers[ timer_name ] == nil then
+                        Timers:CreateTimer( timer_name, {
+                            useGameTime = true,
+                            endTime = 0,
+                            callback = function( pID, args )
+                                local connection_state = PlayerResource:GetConnectionState( pID )
+                                local _timer_name_ = "timer_abandoned_player_"..pID
+
+                                if connection_state == DOTA_CONNECTION_STATE_CONNECTED then
+                                    Timers:RemoveTimer( _timer_name_ )
+                                else
+
+                                    if args.endTime > 300 then
+                                        Timers:RemoveTimer( _timer_name_ )
+                                        GameMode:ShareLeaverGold( pID )
+                                        return
+                                    end
+
+                                    return 1
+                                end
+                            end
+                        }, pID)
+                    end
+
+                end
+
+            end
+
+        end
+    end
+
+    for team, count in pairs( self.PlayersCount ) do
+        if count <= 0 then
+            self.PlayersCount[ team ] = 1
+        end
+    end
+end
+
+function GameMode:ShareLeaverGold( pID )
+    local gold_shared = PlayerResource:GetGold( pID )
+
+    local players_count = 0
+    local teamID = PlayerResource:GetTeam( pID )
+
+    if teamID == DOTA_TEAM_GOODGUYS then
+        players_count = self.PlayersCount.radiant
+    elseif teamID == DOTA_TEAM_BADGUYS then
+        players_count = self.PlayersCount.dire
+    end
+
+    local gold = math.ceil( gold_shared / players_count )
+
+    for slot = 1, 5 do
+        local playerID = PlayerResource:GetNthPlayerIDOnTeam( teamID, slot )
+        local connection_state = PlayerResource:GetConnectionState( playerID )
+        if connection_state == DOTA_CONNECTION_STATE_CONNECTED then
+            PlayerResource:ModifyGold( playerID, gold, false, DOTA_ModifyGold_AbandonedRedistribute )
+        end
+    end
+end
+
 --/////////////////////////////////////////////////////////////////////////////////////////////
 --DISABLED
 --/////////////////////////////////////////////////////////////////////////////////////////////
+
+-- An ability was used by a player
+function GameMode:OnAbilityUsed(keys)
+  DebugPrint('[BAREBONES] AbilityUsed')
+  DebugPrintTable(keys)
+
+  local player = PlayerResource:GetPlayer(keys.PlayerID)
+  local abilityname = keys.abilityname
+end
+
+-- This function is called whenever an ability begins its PhaseStart phase (but before it is actually cast)
+function GameMode:OnAbilityCastBegins(keys)
+  DebugPrint('[BAREBONES] OnAbilityCastBegins')
+  DebugPrintTable(keys)
+
+  local player = PlayerResource:GetPlayer(keys.PlayerID)
+  local abilityName = keys.abilityname
+end
 
 -- A player has reconnected to the game.  This function can be used to repaint Player-based particles or change
 -- state as necessary
@@ -184,16 +324,7 @@ function GameMode:OnItemCombined(keys)
   local itemcost = keys.itemcost
 end
 
--- Cleanup a player when they leave
-function GameMode:OnDisconnect(keys)
-  DebugPrint('[BAREBONES] Player Disconnected ' .. tostring(keys.userid))
-  DebugPrintTable(keys)
 
-  local name = keys.name
-  local networkid = keys.networkid
-  local reason = keys.reason
-  local userid = keys.userid
-end
 
 -- An NPC has spawned somewhere in game.  This includes heroes
 function GameMode:OnNPCSpawned(keys)
@@ -220,14 +351,7 @@ function GameMode:OnItemPurchased( keys )
   local itemcost = keys.itemcost
 end
 
--- An ability was used by a player
-function GameMode:OnAbilityUsed(keys)
-  DebugPrint('[BAREBONES] AbilityUsed')
-  DebugPrintTable(keys)
 
-  local player = PlayerResource:GetPlayer(keys.PlayerID)
-  local abilityname = keys.abilityname
-end
 
 -- A non-player entity (necro-book, chen creep, etc) used an ability
 function GameMode:OnNonPlayerUsedAbility(keys)
@@ -356,36 +480,6 @@ function GameMode:OnEntityKilled( keys )
   -- Put code here to handle when an entity gets killed
 end
 
--- This function is called 1 to 2 times as the player connects initially but before they 
--- have completely connected
-function GameMode:PlayerConnect(keys)
-  DebugPrint('[BAREBONES] PlayerConnect')
-  DebugPrintTable(keys)
-end
-
--- This function is called once when the player fully connects and becomes "Ready" during Loading
-function GameMode:OnConnectFull(keys)
-  DebugPrint('[BAREBONES] OnConnectFull')
-  DebugPrintTable(keys)
-
-  GameMode:_OnConnectFull(keys)
-  
-  local entIndex = keys.index+1
-  -- The Player entity of the joining user
-  local ply = EntIndexToHScript(entIndex)
-  
-  -- The Player ID of the joining player
-  local playerID = ply:GetPlayerID()
-end
-
--- This function is called whenever an ability begins its PhaseStart phase (but before it is actually cast)
-function GameMode:OnAbilityCastBegins(keys)
-  DebugPrint('[BAREBONES] OnAbilityCastBegins')
-  DebugPrintTable(keys)
-
-  local player = PlayerResource:GetPlayer(keys.PlayerID)
-  local abilityName = keys.abilityname
-end
 
 -- This function is called whenever a tower is killed
 function GameMode:OnTowerKill(keys)

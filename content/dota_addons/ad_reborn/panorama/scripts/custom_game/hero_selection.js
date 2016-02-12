@@ -91,7 +91,7 @@ function _cm_UpdateHud()
 {
 	var stateInfo = GetCurrentStateInfo();
 
-	_cm_Heroes_UpdateCover( stateInfo );
+	// _cm_Heroes_UpdateCover( stateInfo );
 	_cm_Heroes_UpdateTable( stateInfo );
 
 	_cm_Selection_UpdateCaptainBlock( stateInfo );
@@ -103,55 +103,56 @@ function _cm_UpdateHud()
 // Cover (mb replace with disabled radiobuttons?)
 //====================================================================================================
 
-function _cm_Heroes_UpdateCover ( stateInfo )
-{
-	var coverPanel = $( "#cmHeroesCover" );
-	var isCover = "isCover";
-	var isHidden = "hidden";
+// function _cm_Heroes_UpdateCover ( stateInfo )
+// {
+// 	var coverPanel = $( "#cmHeroesCover" );
+// 	coverPanel.hittest = true;
+// 	var isCover = "isCover";
+// 	var isHidden = "hidden";
 
-	var pID = Game.GetLocalPlayerInfo().player_id;
+// 	var pID = Game.GetLocalPlayerInfo().player_id;
 
-	if ( adcm )
-	{
-		if ( stateInfo.state == 0 || stateInfo.state > States_MaxNumber )
-		{
-			coverPanel.SetHasClass( isCover, true );
-			coverPanel.SetHasClass( isHidden, false );
-		}
-		else
-		{
-			var isCaptain = CustomNetTables.GetTableValue( "players", pID )[ "isCaptain" ];
+// 	if ( adcm )
+// 	{
+// 		if ( stateInfo.state == 0 || stateInfo.state > States_MaxNumber )
+// 		{
+// 			coverPanel.SetHasClass( isCover, true );
+// 			coverPanel.SetHasClass( isHidden, false );
+// 		}
+// 		else
+// 		{
+// 			var isCaptain = CustomNetTables.GetTableValue( "players", pID )[ "isCaptain" ];
 
-			var pTeam = Game.GetLocalPlayerInfo().player_team_id;
-			var currentTeam = stateInfo.team;
+// 			var pTeam = Game.GetLocalPlayerInfo().player_team_id;
+// 			var currentTeam = stateInfo.team;
 
-			if ( debug )
-			{
-				isCaptain = 1;
-				pTeam = 1;
-				currentTeam = 1;
-			}
+// 			if ( debug )
+// 			{
+// 				isCaptain = 1;
+// 				pTeam = 1;
+// 				currentTeam = 1;
+// 			}
 
-			coverPanel.SetHasClass( isCover, false );
-			if ( isCaptain == 1 && pTeam == currentTeam )
-			{
-				coverPanel.SetHasClass( isHidden, true );
-			}
-		}
-	}
-	else
-	{
-		coverPanel.SetHasClass( isCover, false );
-		coverPanel.SetHasClass( isHidden, true );
+// 			coverPanel.SetHasClass( isCover, false );
+// 			if ( isCaptain == 1 && pTeam == currentTeam )
+// 			{
+// 				coverPanel.SetHasClass( isHidden, true );
+// 			}
+// 		}
+// 	}
+// 	else
+// 	{
+// 		coverPanel.SetHasClass( isCover, false );
+// 		coverPanel.SetHasClass( isHidden, true );
 
-		var playerInfo = CustomNetTables.GetTableValue( "players", pID );
-		if ( playerInfo && playerInfo[ "hero" ] != "" )
-		{
-			coverPanel.SetHasClass( isCover, true );
-			coverPanel.SetHasClass( isHidden, false );
-		}
-	}
-}
+// 		var playerInfo = CustomNetTables.GetTableValue( "players", pID );
+// 		if ( playerInfo && playerInfo[ "hero" ] != "" )
+// 		{
+// 			coverPanel.SetHasClass( isCover, true );
+// 			coverPanel.SetHasClass( isHidden, false );
+// 		}
+// 	}
+// }
 
 
 //====================================================================================================
@@ -163,11 +164,11 @@ function _cm_Heroes_UpdateTable( stateInfo )
 	var container = $( "#cmHeroesTable" );
 	for (var row = 1; row <= 3; row++)
 	{
-		_cm_Heroes_UpdateRow( container, row );
+		_cm_Heroes_UpdateRow( container, row, stateInfo );
 	}
 }
 
-function _cm_Heroes_UpdateRow( container, row )
+function _cm_Heroes_UpdateRow( container, row, stateInfo )
 {
 	var parentPanelId = "_heroes_row_" + row;
 	var parentPanel = container.FindChild( parentPanelId );
@@ -199,11 +200,11 @@ function _cm_Heroes_UpdateRow( container, row )
 			groupPanel.SetHasClass( "cm_heroes_group", true );
 		}
 
-		_cm_Heroes_UpdateGroup( groupKV, groupPanel, groupName );
+		_cm_Heroes_UpdateGroup( groupKV, groupPanel, groupName, stateInfo );
 	}
 }
 
-function _cm_Heroes_UpdateGroup( groupKV, groupPanel, groupName  )
+function _cm_Heroes_UpdateGroup( groupKV, groupPanel, groupName, stateInfo )
 {
 	var groupContainerId = "_heroes_group_container_" + groupName;
 	var groupContainer = groupPanel.FindChild( groupContainerId );
@@ -227,12 +228,12 @@ function _cm_Heroes_UpdateGroup( groupKV, groupPanel, groupName  )
 				heroPanel.SetHasClass( "cm_heroes_heropanel", true );
 			}		
 
-			_cm_Heroes_UpdateHero( groupKV, heroPanel, groupName, heroId, name );
+			_cm_Heroes_UpdateHero( groupKV, heroPanel, groupName, heroId, name, stateInfo );
 	 	}
 	}
 }
 
-function _cm_Heroes_UpdateHero( groupKV, heroPanel, groupName, heroId, name )
+function _cm_Heroes_UpdateHero( groupKV, heroPanel, groupName, heroId, name, stateInfo )
 {
 	var rButton = heroPanel.FindChildInLayoutFile( "RadioButton" );
 	rButton.group = "Heroes";
@@ -244,21 +245,60 @@ function _cm_Heroes_UpdateHero( groupKV, heroPanel, groupName, heroId, name )
 		rButton.enabled = false;
 	}
 
-	if ( adcm )
-	{
-		if ( !Hero_Possible )
-		{
-			rButton.checked = false;
-		}
-	}
-
 	rButton.data = {
 		heroName: name,
 		heroId: heroId,
 		heroGroup: groupName
 		// heroRow: row
 	};
-	rButton.SetPanelEvent( "onselect", PreviewHero( rButton.data ) );
+
+	var pID = Game.GetLocalPlayerInfo().player_id;
+
+	if ( adcm )
+	{
+		if ( !Hero_Possible )
+		{
+			rButton.checked = false;
+		}
+
+		if ( stateInfo.state == 0 || stateInfo.state > States_MaxNumber )
+		{
+			rButton.ClearPanelEvent( "onselect" );
+		}
+		else
+		{
+			var isCaptain = CustomNetTables.GetTableValue( "players", pID )[ "isCaptain" ];
+
+			var teamID = Game.GetLocalPlayerInfo().player_team_id;
+			var currentTeam = stateInfo.team;
+
+			if ( debug )
+			{
+				isCaptain = 1;
+				teamID = 1;
+				currentTeam = 1;
+			}
+
+			if ( isCaptain == 1 && teamID == currentTeam )
+			{
+				rButton.SetPanelEvent( "onselect", PreviewHero( rButton.data ) );
+			}
+			else
+			{
+				rButton.ClearPanelEvent( "onselect" );
+			}
+		}
+	}
+	else
+	{
+		rButton.SetPanelEvent( "onselect", PreviewHero( rButton.data ) );
+
+		var playerInfo = CustomNetTables.GetTableValue( "players", pID );
+		if ( playerInfo && playerInfo[ "hero" ] != "" )
+		{
+			rButton.ClearPanelEvent( "onselect" );
+		}
+	}
 
 	var childImage = heroPanel.FindChildInLayoutFile( "RadioImage" );
 	childImage.heroname = "npc_dota_hero_" + name;

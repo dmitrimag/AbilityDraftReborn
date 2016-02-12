@@ -40,6 +40,8 @@ function Precache( context )
 
   PrecacheResource("model_folder", "models/courier/", context)
   PrecacheResource("model_folder", "models/items/wards", context)
+
+  GameMode.Context = context
 end
 
 -- Create the game mode when we activate
